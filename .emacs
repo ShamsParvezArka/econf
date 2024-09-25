@@ -10,12 +10,18 @@
 (toggle-tool-bar-mode-from-frame 0)
 
 ;; Startup directory
-(setq default-directory "$USERPROFILE")
+(setq default-directory "D:/Codespace")
 
 ;; Auto-pair, auto-completion
 (electric-pair-mode t)
 (ido-mode t)
+(ido-everywhere t)
 (global-company-mode t)
+
+;; Line number
+(setq display-line-numbers-type 'relative) 
+(global-display-line-numbers-mode)
+'(line-number-current-line ((t (:inherit line-number :foreground "yellow2"))))
 
 ;; Font
 (set-face-attribute 'default nil
