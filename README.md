@@ -1,0 +1,2 @@
+# econf
+Emacs config file
