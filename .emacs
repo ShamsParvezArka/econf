@@ -13,14 +13,28 @@
 (toggle-menu-bar-mode-from-frame 0)
 (toggle-tool-bar-mode-from-frame 0)
 
-(require 'expand-region)
-;;(require 'simple-modeline)
-;;(simple-modeline-mode)
+;; Column guideline
+;;(setq-default display-fill-column-indicator-column 80)
+
+;; Backup settings
+(setq backup-directory-alist '(("." . "~/.emacs.d/backup"))
+      backup-by-copying t
+      version-control t)
+(setq create-lockfiles nil)
 
 ;; Auto-pair, auto-completion
 (electric-pair-mode t)
 (ido-mode t)
 (global-company-mode t)
+
+;; Indentation
+(setq-default indent-tabs-mode nil)
+(setq-default tab-width 4)
+(setq indent-line-function 'insert-tab)
+(setq-default c-basic-offset 4
+              c-default-style '((java-mode . "java")
+                                (awk-mode . "awk")
+                                (other . "bsd")))
 
 ;; Line number
 (setq display-line-numbers-type 'relative) 
@@ -40,34 +54,27 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(line-number-current-line ((t (:inherit line-number :foreground "yellow2")))))
+ '(line-number-current-line ((t (:inherit line-number :foreground "white")))))
 
 ;; Theme
 (setq custom-safe-themes t)
 (add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
-(load-theme 'gruber-darker)
+(load-theme 'naysayer t)
 
-(defun insert-line-above ()
-    (interactive)
-    (save-excursion)
-    (end-of-line 0)
-    (newline))
+;; Org-mode setup
+(setq org-hide-emphasis-markers t)
+(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
 
 ;; Key-bindings
 (global-set-key (kbd "M-x") 'smex)
-(global-set-key (kbd "C-o") 'insert-line-above)
 (global-set-key (kbd "C-=") 'er/expand-region)
-(global-set-key (kbd "C-S-d") 'backward-delete-char)
 (global-set-key (kbd "TAB") 'self-insert-command)
-
-;; Indentation
-(setq-default indent-tabs-mode nil)
-(setq-default tab-width 4)
-(setq indent-line-function 'insert-tab)
-(setq-default c-basic-offset 4
-              c-default-style '((java-mode . "java")
-                                (awk-mode . "awk")
-                                (other . "bsd")))
+(global-unset-key (kbd "C-z"))
+(global-unset-key (kbd "C-/"))
+(global-set-key (kbd "C-z") 'undo-fu-only-undo)
+(global-set-key (kbd "C-/") 'undo-fu-only-redo)
+(global-set-key (kbd "C->") 'mc/mark-next-like-this)
+(global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -75,6 +82,6 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(ripgrep smart-tabs-mode undo-fu expand-region simple-modeline company lsp-mode magit multiple-cursors gruber-darker-theme smex)))
+   '(markdown-preview-mode doom-themes kuronami-theme gruvbox-theme org-modern org-bullets org vscode-dark-plus-theme ripgrep smart-tabs-mode undo-fu expand-region simple-modeline company lsp-mode magit multiple-cursors gruber-darker-theme smex)))
 
 
