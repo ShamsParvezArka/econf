@@ -82,6 +82,6 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(markdown-preview-mode doom-themes kuronami-theme gruvbox-theme org-modern org-bullets org vscode-dark-plus-theme ripgrep smart-tabs-mode undo-fu expand-region simple-modeline company lsp-mode magit multiple-cursors gruber-darker-theme smex)))
+   '(markdown-preview-mode gruvbox-theme org-modern org-bullets org ripgrep smart-tabs-mode undo-fu expand-region company lsp-mode magit multiple-cursors gruber-darker-theme smex)))
 
 
