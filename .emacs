@@ -1,9 +1,5 @@
-;; Initialize melpa packages
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
-;; Comment/uncomment this line to enable MELPA Stable if desired.  See `package-archive-priorities`
-;; and `package-pinned-packages`. Most users will not need or want to do this.
-;;(add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/") t)
 (package-initialize)
 
 ;; Debloat frame
@@ -13,13 +9,17 @@
 (toggle-menu-bar-mode-from-frame 0)
 (toggle-tool-bar-mode-from-frame 0)
 
+;; Initial frame size
+(setq initial-frame-alist
+      (append initial-frame-alist
+              '((width  . 90)
+                (height . 30))))
+
 ;; Column guideline
 ;;(setq-default display-fill-column-indicator-column 80)
 
 ;; Backup settings
-(setq backup-directory-alist '(("." . "~/.emacs.d/backup"))
-      backup-by-copying t
-      version-control t)
+(setq make-backup-files nil)
 (setq create-lockfiles nil)
 
 ;; Auto-pair, auto-completion
@@ -30,7 +30,6 @@
 ;; Indentation
 (setq-default indent-tabs-mode nil)
 (setq-default tab-width 4)
-(setq indent-line-function 'insert-tab)
 (setq-default c-basic-offset 4
               c-default-style '((java-mode . "java")
                                 (awk-mode . "awk")
@@ -49,21 +48,23 @@
 (set-face-attribute 'fixed-pitch nil
                     :family "Hack Nerd Font Mono")
 
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(line-number-current-line ((t (:inherit line-number :foreground "white")))))
-
 ;; Theme
 (setq custom-safe-themes t)
 (add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
-(load-theme 'naysayer t)
+(load-theme 'naysayer)
 
 ;; Org-mode setup
 (setq org-hide-emphasis-markers t)
 (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+
+;; Powershell integration
+(setq-default shell-file-name "C:/Program Files/PowerShell/7/pwsh.exe")
+
+;; grep custom commands
+(setq grep-command " grep . -r --color=always -nH --null -e ")
+
+;; Godot gdscript integration
+(setq gdscript-godot-executable "C:/Godot/Godot_v4.3-stable_win64.exe")
 
 ;; Key-bindings
 (global-set-key (kbd "M-x") 'smex)
@@ -82,6 +83,6 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(markdown-preview-mode gruvbox-theme org-modern org-bullets org ripgrep smart-tabs-mode undo-fu expand-region company lsp-mode magit multiple-cursors gruber-darker-theme smex)))
+   '(lua-mode gdscript-mode powershell markdown-preview-mode gruvbox-theme org-modern org-bullets org ripgrep smart-tabs-mode undo-fu expand-region company lsp-mode magit multiple-cursors gruber-darker-theme smex)))
 
 
