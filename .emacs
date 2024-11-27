@@ -13,7 +13,7 @@
 
 ;; Initial frame size
 (setq initial-frame-alist
-      (append initial-frame-alist
+     (append initial-frame-alist
               '((width  . 80)
                 (height . 30))))
 
@@ -30,10 +30,12 @@
 (setq-default indent-tabs-mode nil)
 (setq-default tab-width 4)
 (setq-default c-basic-offset 4
-
               c-default-style '((java-mode . "java")
                                 (awk-mode . "awk")
                                 (other . "bsd")))
+
+;; Disable Fringe Mode
+(set-fringe-mode 0)
 
 ;; Line number
 (setq display-line-numbers-type 'relative) 
@@ -41,19 +43,18 @@
 
 ;; Font
 (set-face-attribute 'default nil
-                    :family "Hack Nerd Font Mono"
-                    :height 145)
+                    :family "Hack Nerd Font"
+                    :height 145) 
 (set-face-attribute 'variable-pitch nil
-                    :family "Hack Nerd Font Mono")
+                    :family "Hack Nerd Font")
 (set-face-attribute 'fixed-pitch nil
-                    :family "Hack Nerd Font Mono")
+                    :family "Hack Nerd Font")
 (add-to-list 'default-frame-alist
-             '(font . "Hack Nerd Font Mono-14.5"))
+             '(font . "Hack Nerd Font-14.5"))
 
 ;; Theme
 (setq custom-safe-themes t)
-(add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
-(load-theme 'naysayer)
+(load-theme 'gruvbox-dark-medium)
 
 ;; Org-mode setup
 (setq org-hide-emphasis-markers t)
@@ -85,6 +86,7 @@
 (global-set-key (kbd "C->") 'mc/mark-next-like-this)
 (global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
 (global-set-key (kbd "C-S-s") 'ripgrep-regexp)
+(global-set-key (kbd "M-'") 'surround-mark-inner)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -92,7 +94,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(elcord simple-modeline lsp-python-ms glsl-mode vscode-dark-plus-theme lsp-pyright lua-mode gdscript-mode powershell markdown-preview-mode gruvbox-theme org-modern org-bullets org ripgrep smart-tabs-mode undo-fu expand-region company lsp-mode magit multiple-cursors gruber-darker-theme smex)))
+   '(naysayer-theme surround elcord simple-modeline lsp-python-ms glsl-mode vscode-dark-plus-theme lsp-pyright lua-mode gdscript-mode powershell markdown-preview-mode gruvbox-theme org-modern org-bullets org ripgrep smart-tabs-mode undo-fu expand-region company lsp-mode magit multiple-cursors gruber-darker-theme smex)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
