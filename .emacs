@@ -26,7 +26,7 @@
 (ido-mode t)
 (add-hook 'after-init-hook 'global-company-mode)
 (prettify-symbols-mode t)
-(toggle-truncate-lines t)
+(setq-default truncate-lines t)
 (set-display-table-slot standard-display-table 0 ?\ )
 
 (use-package emacs
