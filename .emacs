@@ -9,7 +9,7 @@
 ;;            means you're in a stable phase.
 
 
-;; [Settings::Bootstrap_MELPA]
+;; [Settings::MELPA]
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
 (package-initialize)
@@ -17,17 +17,23 @@
 
 ;; [Settings::Frame]
 (setq inhibit-startup-screen t)
-(toggle-scroll-bar t)
 (scroll-bar-mode 0)
 (toggle-menu-bar-mode-from-frame 0)
 (toggle-tool-bar-mode-from-frame 0)
 (set-fringe-mode 0)
-(setq split-height-threshold nil    ;; Uncomment this expression if you want
-      split-width-threshold 0)      ;; emacs auto split into vertical mode
-(setq initial-frame-alist
-     (append initial-frame-alist
-              '((width  . 80)
-                (height . 30))))
+;;(setq split-height-threshold nil    ;; Uncomment this expression if you want
+;;      split-width-threshold 0)      ;; emacs auto split into vertical mode
+;;(setq initial-frame-alist
+;;      (append initial-frame-alist
+;;              '((width  . 80)
+;;                (height . 30))))
+(display-fill-column-indicator-mode t)
+;; (setq-default display-fill-column-indicator-column 90)
+(setq initial-scratch-message "")
+(add-to-list 'default-frame-alist '(fullscreen . maximized))
+(split-window-right)
+(other-window -1)
+(simple-modeline-mode t)
 
 
 ;; [Settings::Scroll]
@@ -44,9 +50,31 @@
 (setq create-lockfiles nil)
 
 
+;; [Settings::Dired]
+(add-hook 'dired-mode-hook 'auto-revert-mode)
+
+
+;; [Settings::Compilation ]
+(add-to-list 'display-buffer-alist
+             '("\\*compilation\\*"
+               (display-buffer-reuse-window
+                display-buffer-in-side-window)
+               (side . bottom)
+               (window-height . 0.2)
+               (inhibit-same-window . nil))) 
+
+(defun custom/select-compilation-window ()
+  (when (string= (buffer-name) "*compilation*")
+    ;; Ensure buffer is displayed and focused
+    (let ((win (display-buffer (current-buffer))))
+      (when (window-live-p win)
+        (select-window win)))))
+(add-hook 'compilation-mode-hook #'custom/select-compilation-window)
+
+
 ;; [Settings::Auto_Completion]
 (ido-mode t)
-(electric-pair-mode t)
+;; (electric-pair-mode t)
 (add-hook 'after-init-hook 'global-company-mode)
 (use-package emacs
   :custom
@@ -55,50 +83,91 @@
   (read-extended-command-predicate #'command-completion-default-include-p))
 
 
+;; [Settings::Eglot]
+(use-package eglot	
+  :hook
+  ((c-mode . eglot-ensure)
+   (c++-mode . eglot-ensure)
+   (eglot-managed-mode . (lambda ()
+                           (eglot-inlay-hints-mode -1)
+                           (flymake-mode -1)
+                           ;; Disable auto-format on file save
+                           (remove-hook 'before-save-hook #'eglot-format-buffer t))))
+  :config
+  ;; Prevent eglto from auto-formatting(YEAH! AUTO-FORMAT IS A DIRECT SLAP IN PROGRAMMERS FACE).
+  (add-to-list 'eglot-ignored-server-capabilities 'documentFormattingProvider)
+  (add-to-list 'eglot-ignored-server-capabilities 'documentRangeFormattingProvider)
+  (add-to-list 'eglot-server-programs
+               '(c-mode . ("clangd" "--fallback-style=none")))
+  (add-to-list 'eglot-server-programs
+               '(c++-mode . ("clangd" "--fallback-style=none"))))
+
+(with-eval-after-load "eglot"
+  (add-to-list 'eglot-stay-out-of 'flymake))
+(setq eldoc-echo-area-use-multiline-p nil)
+(setq js2-strict-missing-semi-warning nil)
+
+
 ;; [Settings::Indentation]
 (setq-default indent-tabs-mode nil)
-(setq-default tab-width 4)
-(setq-default c-basic-offset 4
+(setq-default tab-width 2)
+(setq-default c-basic-offset 2
               c-default-style '((java-mode . "java")
                                 (awk-mode . "awk")
                                 (other . "bsd")))
 (add-hook 'python-mode-hook
           (lambda ()
-            (setq indent-tabs-mode t)
-            (setq tab-width 4)
+            (setq-default indent-tabs-mode nil)
+            (setq tab-width 2)
             (setq python-indent-offset 4)))
 
 
-;; [Settings::Rust_Mode]
-(require 'rust-mode)
-(add-hook 'rust-mode-hook
-          (lambda () (setq indent-tabs-mode nil)))
-(add-hook 'rust-mode-hook
-          (lambda () (prettify-symbols-mode)))
+;; (require 'rust-mode)
+;; (add-hook 'rust-mode-hook
+;;           (lambda () (setq indent-tabs-mode nil)))
+;; (add-hook 'rust-mode-hook
+;;           (lambda () (prettify-symbols-mode)))
 
 
 ;; [Settings::Line_Numbers]
-(setq display-line-numbers-type 'relative) 
+;;(setq display-line-numbers-type 'relative) 
 (global-display-line-numbers-mode)
 
 
 ;; [Settings::Font]
 (set-face-attribute 'default nil
-                    :family "Hack"
-                    :height 145)
+                    :family "Liberation Mono"
+                    :height 120)
 (set-face-attribute 'variable-pitch nil
-                    :family "Hack")
+                    :family "Liberation Mono")
 (set-face-attribute 'fixed-pitch nil
-                    :family "Hack")
+                    :family "Liberation Mono")
 (set-face-attribute 'tooltip nil
                     :family "Aptos Display")
 
 
 ;; [Settigns::Theme]
+(add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
 (setq custom-safe-themes t)
-(load-theme 'naysayer)
-(set-cursor-color "#80f765")
+(load-theme 'fleury)
+;; The below expression will disable bold font globaly(Must be invoked after theme callback)
+(mapc
+ (lambda (face)
+   (set-face-attribute face nil :weight 'normal :underline nil))
+ (face-list))
 
+;;(use-package highlight-indent-guides
+;;  :hook
+;;  (prog-mode . highlight-indent-guides-mode)
+;;  :config
+;;  (setq highlight-indent-guides-method 'character)
+;;  (setq highlight-indent-guides-character ?\│)
+;;  (setq highlight-indent-guides-responsive 'top)
+;;;;  (setq highlight-indent-guides-auto-enabled t)
+;;  (setq highlight-indent-guides-auto-enabled nil)
+;;	(set-face-foreground 'highlight-indent-guides-character-face "gray25")
+;;	(set-face-foreground 'highlight-indent-guides-top-character-face "dimgray"))
+  
 
 ;; [Settings::Org_Mode]
 (setq org-hide-emphasis-markers t)
@@ -107,29 +176,20 @@
                            (org-indent-mode 1)))
 
 
-;; [Settings::Eglot]
-(use-package eglot)
-(add-hook 'eglot-managed-mode-hook (lambda ()
-                                     (eglot-inlay-hints-mode -1)))
-(setq eldoc-echo-area-use-multiline-p nil)
-(with-eval-after-load "eglto"
-  (add-to-list 'eglot-stay-out-of 'flymake))
-(setq js2-strict-missing-semi-warning nil)
-
-
 ;; [Settings::Macro]
 (global-unset-key (kbd "C-z"))
-(global-unset-key (kbd "C-/"))
 (global-set-key (kbd "M-x") 'smex)
-(global-set-key (kbd "C-=") 'er/expand-region)
 (global-set-key (kbd "TAB") 'self-insert-command)
-(global-set-key (kbd "C-z") 'undo-fu-only-undo)
-(global-set-key (kbd "C-/") 'undo-fu-only-redo)
-(global-set-key (kbd "C-.") 'mc/mark-next-like-this)
-(global-set-key (kbd "C-,") 'mc/mark-previous-like-this)
-(global-set-key (kbd "C-S-s") 'ripgrep-regexp)
-(global-set-key (kbd "C-'") 'surround-mark) 
-(global-set-key (kbd "<escape>") 'keyboard-escape-quit)    ;; This one nuts
+(global-set-key (kbd "C-=") 'dired-create-empty-file)
+(global-set-key (kbd "C-'") 'surround-mark)
+(global-set-key (kbd "C-x C-k") 'c-indent-line-or-region)
+(global-set-key (kbd "M-o") 'replace-regexp)
+(defun custom/compile-or-recompile ()
+  (interactive)
+  (if (get-buffer "*compilation*")
+      (recompile)
+    (call-interactively 'compile)))
+(global-set-key (kbd "M-m") #'custom/compile-or-recompile)
 
 
 (custom-set-variables
@@ -138,7 +198,21 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(auto-package-update python-mode github-dark-vscode-theme gruber-darker-theme naysayer-theme gnu-elpa-keyring-update smooth-scrolling eglot-java markdown-preview-eww markdown-toc flymd eldoc-box rust-mode modus-themes nerd-icons-dired all-the-icons-dired nerd-icons babel surround elcord lsp-python-ms glsl-mode vscode-dark-plus-theme lsp-pyright lua-mode gdscript-mode powershell markdown-preview-mode gruvbox-theme org-modern org-bullets org ripgrep smart-tabs-mode undo-fu expand-region company lsp-mode magit multiple-cursors smex)))
+   '(all-the-icons-dired auto-package-update babel company doom-themes
+                         eglot-java elcord eldoc-box expand-region
+                         flymd gdscript-mode github-dark-vscode-theme
+                         glsl-mode gnu-elpa-keyring-update
+                         gruber-darker-theme gruvbox-theme
+                         highlight-indent-guides js2-mode keycast
+                         lsp-mode lsp-pyright lsp-python-ms lua-mode
+                         magit markdown-preview-eww
+                         markdown-preview-mode markdown-toc
+                         modus-themes monokai-pro-theme monokai-theme
+                         multiple-cursors naysayer-theme nerd-icons
+                         nerd-icons-dired org org-bullets org-modern
+                         powershell python-mode rainbow-mode ripgrep
+                         rust-mode simple-modeline smart-tabs-mode
+                         smex surround undo-fu vscode-dark-plus-theme)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
