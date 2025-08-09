@@ -1,6 +1,6 @@
 
 ;; Author   : Shams Parvez Arka <parvez6826@gamil.com>
-;; Version  : 0.1
+;; Version  : 0.2
 ;; Philosopy: Keep It Super Simple (KISS)
 ;; License  : MIT
 ;; URL      : https://github.com/ShamsParvezArka/econf.git
