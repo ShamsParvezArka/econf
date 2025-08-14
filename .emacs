@@ -84,7 +84,7 @@
 
 
 ;; [Settings::Eglot]
-(use-package eglot	
+(use-package eglot  
   :hook
   ((c-mode . eglot-ensure)
    (c++-mode . eglot-ensure)
@@ -111,27 +111,32 @@
 ;; [Settings::Indentation]
 (setq-default indent-tabs-mode nil)
 (setq-default tab-width 2)
-(setq-default c-basic-offset 2
-              c-default-style '((java-mode . "java")
-                                (awk-mode . "awk")
-                                (other . "bsd")))
-(add-hook 'python-mode-hook
-          (lambda ()
-            (setq-default indent-tabs-mode nil)
-            (setq tab-width 2)
-            (setq python-indent-offset 4)))
 
+(defun custom/indent ()
+  (setq indent-tabs-mode nil)
+  (setq tab-width 2)
+  (setq-local standard-indent 2)
+  (when (boundp 'c-basic-offset) (setq c-basic-offset 2))
+  (when (boundp 'python-indent-offset) (setq python-indent-offset 2))
+  (when (boundp 'js-indent-level) (setq js-indent-level 2))
+  (when (boundp 'typescript-indent-level) (setq typescript-indent-level 2))
+  (when (boundp 'css-indent-offset) (setq css-indent-offset 2))
+  (when (boundp 'sgml-basic-offset) (setq sgml-basic-offset 2))
+  (when (derived-mode-p 'c-mode 'c++-mode 'java-mode)
+    (c-set-offset 'case-label '+))
+  (untabify (point-min) (point-max))
+  (add-hook 'before-save-hook
+            (lambda ()
+              (untabify (point-min) (point-max)))
+            nil t))
 
-;; (require 'rust-mode)
-;; (add-hook 'rust-mode-hook
-;;           (lambda () (setq indent-tabs-mode nil)))
-;; (add-hook 'rust-mode-hook
-;;           (lambda () (prettify-symbols-mode)))
+(add-hook 'prog-mode-hook #'custom/indent)
+(add-hook 'text-mode-hook #'custom/indent)
 
 
 ;; [Settings::Line_Numbers]
-;;(setq display-line-numbers-type 'relative) 
-(global-display-line-numbers-mode)
+;;(setq display-line-numbers-type 'relative)
+(add-hook 'prog-mode-hook #'display-line-numbers-mode)
 
 
 ;; [Settings::Font]
@@ -165,8 +170,8 @@
 ;;  (setq highlight-indent-guides-responsive 'top)
 ;;;;  (setq highlight-indent-guides-auto-enabled t)
 ;;  (setq highlight-indent-guides-auto-enabled nil)
-;;	(set-face-foreground 'highlight-indent-guides-character-face "gray25")
-;;	(set-face-foreground 'highlight-indent-guides-top-character-face "dimgray"))
+;;  (set-face-foreground 'highlight-indent-guides-character-face "gray25")
+;;  (set-face-foreground 'highlight-indent-guides-top-character-face "dimgray"))
   
 
 ;; [Settings::Org_Mode]
@@ -178,6 +183,9 @@
 
 ;; [Settings::Macro]
 (global-unset-key (kbd "C-z"))
+(global-unset-key (kbd "C-/"))
+(global-unset-key (kbd "C-u"))
+(global-set-key (kbd "C-u") 'undo)
 (global-set-key (kbd "M-x") 'smex)
 (global-set-key (kbd "TAB") 'self-insert-command)
 (global-set-key (kbd "C-=") 'dired-create-empty-file)
@@ -219,3 +227,4 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+(put 'downcase-region 'disabled nil)
