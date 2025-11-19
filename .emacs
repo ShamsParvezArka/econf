@@ -1,4 +1,3 @@
-
 ;; Author   : Shams Parvez Arka <parvez6826@gamil.com>
 ;; Version  : 0.2
 ;; Philosopy: Keep It Super Simple (KISS)
@@ -9,26 +8,19 @@
 ;;            means you're in a stable phase.
 
 
-;; [Settings::MELPA]
+;; [Settings::MELPA] --------------------------------------------------------------------------------
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
 (package-initialize)
 
 
-;; [Settings::Frame]
+;; [Settings::Frame] --------------------------------------------------------------------------------
 (setq inhibit-startup-screen t)
 (scroll-bar-mode 0)
 (toggle-menu-bar-mode-from-frame 0)
 (toggle-tool-bar-mode-from-frame 0)
 (set-fringe-mode 0)
-;;(setq split-height-threshold nil    ;; Uncomment this expression if you want
-;;      split-width-threshold 0)      ;; emacs auto split into vertical mode
-;;(setq initial-frame-alist
-;;      (append initial-frame-alist
-;;              '((width  . 80)
-;;                (height . 30))))
 (display-fill-column-indicator-mode t)
-;; (setq-default display-fill-column-indicator-column 90)
 (setq initial-scratch-message "")
 (add-to-list 'default-frame-alist '(fullscreen . maximized))
 (split-window-right)
@@ -36,25 +28,42 @@
 (simple-modeline-mode t)
 
 
-;; [Settings::Scroll]
+;; [Settings::Scroll] --------------------------------------------------------------------------------
 (pixel-scroll-precision-mode t)
 
 
-;; [Settings::Text_Wraping]
+;; [Settings::Text_Wraping] --------------------------------------------------------------------------------
 (setq-default truncate-lines t)
 (set-display-table-slot standard-display-table 0 ?\ )
 
 
-;; [Settings::Lockfile]
+;; [Settings::Lockfile] --------------------------------------------------------------------------------
 (setq make-backup-files nil)
 (setq create-lockfiles nil)
 
 
-;; [Settings::Dired]
+;; [Settings::Dired] --------------------------------------------------------------------------------
 (add-hook 'dired-mode-hook 'auto-revert-mode)
 
 
-;; [Settings::Compilation ]
+;; [Settings::Custom Comment] --------------------------------------------------------------------------------
+(defun custom/c-comment ()
+  (setq-local comment-insert-comment-function
+              (lambda ()
+                (let ((dashes (make-string 80 ?-)))                
+                (insert "//  " dashes)
+                (backward-char 81)))))
+(defun custom/batch-comment ()
+  (setq-local comment-insert-comment-function
+              (lambda ()
+                (let ((dashes (make-string 80 ?-)))                
+                (insert "::  " dashes)
+                (backward-char 81)))))
+(add-hook 'c-mode-hook #'custom/c-comment)
+(add-hook 'bat-mode-hook #'custom/batch-comment)
+
+
+;; [Settings::Compilation] --------------------------------------------------------------------------------
 (add-to-list 'display-buffer-alist
              '("\\*compilation\\*"
                (display-buffer-reuse-window
@@ -72,9 +81,9 @@
 (add-hook 'compilation-mode-hook #'custom/select-compilation-window)
 
 
-;; [Settings::Auto_Completion]
+;; [Settings::Auto Completion] --------------------------------------------------------------------------------
 (ido-mode t)
-;; (electric-pair-mode t)
+(add-hook 'prog-mode-hook 'electric-pair-mode)
 (add-hook 'after-init-hook 'global-company-mode)
 (use-package emacs
   :custom
@@ -83,7 +92,7 @@
   (read-extended-command-predicate #'command-completion-default-include-p))
 
 
-;; [Settings::Eglot]
+;; [Settings::Eglot] --------------------------------------------------------------------------------
 (use-package eglot  
   :hook
   ((c-mode . eglot-ensure)
@@ -95,54 +104,72 @@
                            (remove-hook 'before-save-hook #'eglot-format-buffer t))))
   :config
   ;; Prevent eglto from auto-formatting(YEAH! AUTO-FORMAT IS A DIRECT SLAP IN PROGRAMMERS FACE).
+  (setq eglot-extend-to-xref nil)
+
+  (add-to-list 'eglot-ignored-server-capabilities 'documentOnTypeFormattingProvider)
   (add-to-list 'eglot-ignored-server-capabilities 'documentFormattingProvider)
   (add-to-list 'eglot-ignored-server-capabilities 'documentRangeFormattingProvider)
-  (add-to-list 'eglot-server-programs
-               '(c-mode . ("clangd" "--fallback-style=none")))
-  (add-to-list 'eglot-server-programs
-               '(c++-mode . ("clangd" "--fallback-style=none"))))
 
+  (setf (alist-get 'c-mode eglot-server-programs)
+        '("clangd" "--enable-config=no" "--fallback-style=none"))
+  (setf (alist-get 'c++-mode eglot-server-programs)
+        '("clangd" "--enable-config=no" "--fallback-style=none")))
+  
 (with-eval-after-load "eglot"
   (add-to-list 'eglot-stay-out-of 'flymake))
 (setq eldoc-echo-area-use-multiline-p nil)
 (setq js2-strict-missing-semi-warning nil)
 
 
-;; [Settings::Indentation]
-(setq-default indent-tabs-mode nil)
-(setq-default tab-width 2)
+;; [Settings::OmniSharp Setup] --------------------------------------------------------------------------------
+(setq omnisharp-server-executable-path "C:\\Program Files (x86)\\omnisharp-win-x86\\OmniSharp.exe")
+(eval-after-load 'company
+  '(add-to-list 'company-backends 'company-omnisharp))
 
-(defun custom/indent ()
-  (setq indent-tabs-mode nil)
-  (setq tab-width 2)
-  (setq-local standard-indent 2)
-  (when (boundp 'c-basic-offset) (setq c-basic-offset 2))
-  (when (boundp 'python-indent-offset) (setq python-indent-offset 2))
-  (when (boundp 'js-indent-level) (setq js-indent-level 2))
+
+;; [Settings::Indentation] --------------------------------------------------------------------------------
+(setq-default indent-tabs-mode nil
+	      tab-width 2
+	      standard-indent 2)
+
+(defun custom/language-specific-indent ()
+  (when (boundp 'c-basic-offset)          (setq c-basic-offset 2))  
+  (when (boundp 'python-indent-offset)    (setq python-indent-offset 2))
+  (when (boundp 'js-indent-level)         (setq js-indent-level 2))
   (when (boundp 'typescript-indent-level) (setq typescript-indent-level 2))
-  (when (boundp 'css-indent-offset) (setq css-indent-offset 2))
-  (when (boundp 'sgml-basic-offset) (setq sgml-basic-offset 2))
-  (when (derived-mode-p 'c-mode 'c++-mode 'java-mode)
-    (c-set-offset 'case-label '+))
-  (untabify (point-min) (point-max))
-  (add-hook 'before-save-hook
-            (lambda ()
-              (untabify (point-min) (point-max)))
-            nil t))
+  (when (boundp 'css-indent-offset)       (setq css-indent-offset 2))
+  (when (boundp 'sgml-basic-offset)       (setq sgml-basic-offset 2)))
 
-(add-hook 'prog-mode-hook #'custom/indent)
-(add-hook 'text-mode-hook #'custom/indent)
+(defun custom/untabify-buffer ()
+  (when (not indent-tabs-mode)
+    (untabify (point-min) (point-max))))
+
+(c-add-style "handmade"
+             '("k&r"
+               (c-offsets-alist (case-label . +)
+				(statement-case-open . 0)
+				(statement-case-intro . +)
+				(substatement-open . 0)
+				(block-open . 0)
+				(block-close . 0)
+				(defun-open . 0)
+				(defun-close . 0))))
+
+(add-hook 'c-mode-common-hook (lambda () (c-set-style "handmade")))
+(add-hook 'prog-mode-hook 'custom/language-specific-indent)
+(add-hook 'text-mode-hook 'custom/language-specific-indent)
+(add-hook 'before-save-hook 'custom/untabify-buffer)
 
 
-;; [Settings::Line_Numbers]
+;; [Settings::Line Numbers] --------------------------------------------------------------------------------
 ;;(setq display-line-numbers-type 'relative)
-(add-hook 'prog-mode-hook #'display-line-numbers-mode)
+;;(add-hook 'prog-mode-hook 'display-line-numbers-mode) ;; DO I REALLY NEED LINE NUMBERS
 
 
-;; [Settings::Font]
+;; [Settings::Font] --------------------------------------------------------------------------------
 (set-face-attribute 'default nil
                     :family "Liberation Mono"
-                    :height 120)
+                    :height 130)
 (set-face-attribute 'variable-pitch nil
                     :family "Liberation Mono")
 (set-face-attribute 'fixed-pitch nil
@@ -151,7 +178,7 @@
                     :family "Aptos Display")
 
 
-;; [Settigns::Theme]
+;; [Settigns::Theme] --------------------------------------------------------------------------------
 (add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
 (setq custom-safe-themes t)
 (load-theme 'fleury)
@@ -161,44 +188,37 @@
    (set-face-attribute face nil :weight 'normal :underline nil))
  (face-list))
 
-;;(use-package highlight-indent-guides
-;;  :hook
-;;  (prog-mode . highlight-indent-guides-mode)
-;;  :config
-;;  (setq highlight-indent-guides-method 'character)
-;;  (setq highlight-indent-guides-character ?\│)
-;;  (setq highlight-indent-guides-responsive 'top)
-;;;;  (setq highlight-indent-guides-auto-enabled t)
-;;  (setq highlight-indent-guides-auto-enabled nil)
-;;  (set-face-foreground 'highlight-indent-guides-character-face "gray25")
-;;  (set-face-foreground 'highlight-indent-guides-top-character-face "dimgray"))
-  
 
-;; [Settings::Org_Mode]
+;; [Settings::Org Mode] --------------------------------------------------------------------------------
 (setq org-hide-emphasis-markers t)
 (add-hook 'org-mode-hook (lambda ()
                            (org-bullets-mode 1)
                            (org-indent-mode 1)))
 
 
-;; [Settings::Macro]
-(global-unset-key (kbd "C-z"))
-(global-unset-key (kbd "C-/"))
-(global-unset-key (kbd "C-u"))
-(global-set-key (kbd "C-u") 'undo)
-(global-set-key (kbd "M-x") 'smex)
-(global-set-key (kbd "TAB") 'self-insert-command)
-(global-set-key (kbd "C-=") 'dired-create-empty-file)
-(global-set-key (kbd "C-'") 'surround-mark)
-(global-set-key (kbd "C-x C-k") 'c-indent-line-or-region)
-(global-set-key (kbd "M-o") 'replace-regexp)
+;; [Settings::Macro] --------------------------------------------------------------------------------
 (defun custom/compile-or-recompile ()
   (interactive)
   (if (get-buffer "*compilation*")
       (recompile)
     (call-interactively 'compile)))
-(global-set-key (kbd "M-m") #'custom/compile-or-recompile)
 
+(global-unset-key (kbd "C-z"))
+(global-unset-key (kbd "C-/"))
+(global-unset-key (kbd "C-u"))
+
+(global-set-key   (kbd "C-u")     'undo)
+(global-set-key   (kbd "C-=")     'dired-create-empty-file)
+(global-set-key   (kbd "C-'")     'surround-mark)
+(global-set-key   (kbd "C-x C-k") 'c-indent-line-or-region)
+(global-set-key   (kbd "C-c o")   'window-swap-states)
+(global-set-key   (kbd "M-x")     'smex)
+(global-set-key   (kbd "M-o")     'replace-regexp)
+(global-set-key   (kbd "M-m")     'custom/compile-or-recompile)
+(global-set-key   (kbd "TAB")     'self-insert-command)
+
+
+;; [Mics.] --------------------------------------------------------------------------------
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
@@ -212,15 +232,15 @@
                          glsl-mode gnu-elpa-keyring-update
                          gruber-darker-theme gruvbox-theme
                          highlight-indent-guides js2-mode keycast
-                         lsp-mode lsp-pyright lsp-python-ms lua-mode
-                         magit markdown-preview-eww
-                         markdown-preview-mode markdown-toc
-                         modus-themes monokai-pro-theme monokai-theme
-                         multiple-cursors naysayer-theme nerd-icons
-                         nerd-icons-dired org org-bullets org-modern
-                         powershell python-mode rainbow-mode ripgrep
-                         rust-mode simple-modeline smart-tabs-mode
-                         smex surround undo-fu vscode-dark-plus-theme)))
+                         lsp-pyright lsp-python-ms lua-mode magit
+                         markdown-preview-eww markdown-preview-mode
+                         markdown-toc modus-themes monokai-pro-theme
+                         monokai-theme multiple-cursors naysayer-theme
+                         nerd-icons nerd-icons-dired omnisharp org
+                         org-bullets org-modern powershell python-mode
+                         rainbow-mode ripgrep rust-mode
+                         simple-modeline smart-tabs-mode smex surround
+                         undo-fu vertico vscode-dark-plus-theme)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
